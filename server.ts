@@ -1,13 +1,30 @@
 import { createServer } from "http";
-import { Server } from "socket.io";
-import express from "express";
+import { Server, Socket } from "socket.io";
+import express, { Request, Response } from "express";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 const port = process.env.PORT || 3000;
 
+// Start the server
 server.listen(port, () => {
   console.log(`The server is running at http://localhost:${port}`)
 })
+
+// Listen to connection from the client
+io.on('connection', (socket: Socket) => {
+  console.log('A user has connected');
+})
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename)
+
+// Serve the assets
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(join(__dirname, 'index.html'))
+})
+
 
