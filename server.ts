@@ -17,6 +17,13 @@ server.listen(port, () => {
 // Listen to connection from the client
 io.on('connection', (socket: Socket) => {
   console.log('A user has connected');
+  // Emit a message to the client
+  socket.emit('messageFromServer', 'Hello from the server');
+
+  // Listen for a message from the client
+  socket.on('messageFromClient', (message: string) => {
+    console.log('Received from the client', message);
+  })
 })
 
 const __filename = fileURLToPath(import.meta.url);
