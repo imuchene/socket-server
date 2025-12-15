@@ -29,6 +29,9 @@ io.on('connection', (socket: Socket) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Serve the static files from the public folder
+app.use(express.static(join(__dirname, 'public')));
+
 // Serve the assets
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(join(__dirname, 'index.html'));
