@@ -22,7 +22,7 @@ io.on('connection', (socket: Socket) => {
 
   // Listen for a message from the client
   socket.on('messageFromClient', (message: string) => {
-    console.log('Received from the client', message);
+    console.log('Message received from the client: ', message);
   });
 });
 
