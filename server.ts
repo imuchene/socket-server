@@ -23,7 +23,19 @@ io.on('connection', (socket: Socket) => {
   // Listen for a message from the client
   socket.on('messageFromClient', (message: string) => {
     console.log('Message received from the client: ', message);
+    // Broadcast the message to all connected clients except the sender
+    socket.broadcast.emit('messageFromServer', message);
   });
+
+  // Acknowledgement
+  // Send a greeting with an acknowledgement
+  socket.emit(
+    'greeting',
+    'Hey there! Welcome to the server',
+    (response: Response) => {
+      console.log('The client has received the message', response);
+    },
+  );
 });
 
 const __filename = fileURLToPath(import.meta.url);
