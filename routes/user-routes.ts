@@ -3,7 +3,7 @@ import { User } from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 
-const userRouter = Router();
+export const userRouter = Router();
 
 // Registration route
 userRouter.post('/register', async (req: Request, res: Response) => {

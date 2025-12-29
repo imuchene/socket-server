@@ -1,50 +1,44 @@
 import { createServer } from 'http';
-import { Server, Socket } from 'socket.io';
-import express, { Request, Response } from 'express';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { Server } from 'socket.io';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import { socketIo } from './socket';
+import { userRouter } from './routes/user-routes';
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
-const port = process.env.PORT || 3000;
+const io = new Server(server, {
+  cors: {
+    origin: [String(process.env.FRONTEND_URL)],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+const port = process.env.PORT || 5000;
 
 // Start the server
 server.listen(port, () => {
   console.log(`The server is running at http://localhost:${port}`);
 });
 
-// Listen to connection from the client
-io.on('connection', (socket: Socket) => {
-  console.log('A user has connected');
-  // Emit a message to the client
-  socket.emit('messageFromServer', 'Hello from the server');
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-  // Listen for a message from the client
-  socket.on('messageFromClient', (message: string) => {
-    console.log('Message received from the client: ', message);
-    // Broadcast the message to all connected clients except the sender
-    socket.broadcast.emit('messageFromServer', message);
-  });
-
-  // Acknowledgement
-  // Send a greeting with an acknowledgement
-  socket.emit(
-    'greeting',
-    'Hey there! Welcome to the server',
-    (response: Response) => {
-      console.log('The client has received the message', response);
+// Connect to database
+mongoose
+  .connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`, {
+    dbName: process.env.MONGO_DATABASE,
+    auth: {
+      username: process.env.MONGO_USERNAME,
+      password: process.env.MONGO_PASSWORD,
     },
-  );
-});
+  })
+  .then(() => console.log('Connected to DB'))
+  .catch((err) => console.error('MongoDB connection failed', err));
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Initialize Socket.io
+socketIo(io);
 
-// Serve the static files from the public folder
-app.use(express.static(join(__dirname, 'public')));
-
-// Serve the assets
-app.get('/', (req: Request, res: Response) => {
-  res.sendFile(join(__dirname, 'index.html'));
-});
+app.use('/api/users', userRouter);
