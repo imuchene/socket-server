@@ -4,7 +4,9 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { socketIo } from './socket';
+import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user-routes';
+import { groupRouter } from './routes/group-routes';
 
 const app = express();
 const server = createServer(app);
@@ -25,6 +27,7 @@ server.listen(port, () => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Connect to database
 mongoose
@@ -41,4 +44,6 @@ mongoose
 // Initialize Socket.io
 socketIo(io);
 
+// App routes
 app.use('/api/users', userRouter);
+app.use('/api/groups', groupRouter);

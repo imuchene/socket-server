@@ -3,28 +3,36 @@ import { User } from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { CookieNames } from '../enums/cookie-names.enum';
+import { Group } from '../models/group.model';
 
-export const userRouter = Router();
+export const groupRouter = Router();
 
 // Registration route
-userRouter.post('/register', async (req: Request, res: Response) => {
+groupRouter.post('/', async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body;
-    // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const { name, description } = req.body;
+    // Check if a group already exists
+    const groupExists = await Group.findOne({ name });
 
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    if (groupExists) {
+      return res.status(400).json({ message: 'Group already exists' });
     }
 
-    // Create the new user
-    const user = await User.create({ username, email, password });
+    // Create the new group
+    const group = await Group.create({
+      name,
+      description,
+      // admin: req.user._id,
+      // members: [req.user._id],
+    });
 
-    if (user) {
+    if (group) {
+      const populatedGroup = await Group.findById(group._id)
+        .populate('admin', 'username email')
+        .populate('members', 'username email');
+
       res.status(201).json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
+        populatedGroup,
       });
     }
   } catch (error) {
@@ -35,7 +43,7 @@ userRouter.post('/register', async (req: Request, res: Response) => {
 });
 
 // Login route
-userRouter.post('/login', async (req: Request, res: Response) => {
+groupRouter.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
