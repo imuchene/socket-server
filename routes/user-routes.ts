@@ -3,6 +3,7 @@ import { User } from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { CookieNames } from '../enums/cookie-names.enum';
+import { JwtData } from '../interfaces/jwt-data.interface';
 
 export const userRouter = Router();
 
@@ -68,5 +69,8 @@ userRouter.post('/login', async (req: Request, res: Response) => {
 
 const generateToken = (id: Types.ObjectId) => {
   // Set the jwt token to expire in 10 minutes
-  return jwt.sign({ id }, String(process.env.JWT_SECRET), { expiresIn: '10m' });
+  const jwtData: JwtData = { id };
+  return jwt.sign(jwtData, String(process.env.JWT_SECRET), {
+    expiresIn: '10m',
+  });
 };

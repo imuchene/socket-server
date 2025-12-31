@@ -4,11 +4,12 @@ import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { CookieNames } from '../enums/cookie-names.enum';
 import { Group } from '../models/group.model';
+import { protect } from '../middleware/auth.middleware';
 
 export const groupRouter = Router();
 
 // Registration route
-groupRouter.post('/', async (req: Request, res: Response) => {
+groupRouter.post('/', protect, async (req: Request, res: Response) => {
   try {
     const { name, description } = req.body;
     // Check if a group already exists
@@ -22,8 +23,8 @@ groupRouter.post('/', async (req: Request, res: Response) => {
     const group = await Group.create({
       name,
       description,
-      // admin: req.user._id,
-      // members: [req.user._id],
+      admin: req.user._id,
+      members: [req.user._id],
     });
 
     if (group) {
