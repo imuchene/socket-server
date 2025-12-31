@@ -4,12 +4,12 @@ import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { CookieNames } from '../enums/cookie-names.enum';
 import { Group } from '../models/group.model';
-import { protect } from '../middleware/auth.middleware';
+import { isAdmin, protect } from '../middleware/auth.middleware';
 
 export const groupRouter = Router();
 
 // Registration route
-groupRouter.post('/', protect, async (req: Request, res: Response) => {
+groupRouter.post('/', protect, isAdmin, async (req: Request, res: Response) => {
   try {
     const { name, description } = req.body;
     // Check if a group already exists
