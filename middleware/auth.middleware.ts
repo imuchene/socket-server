@@ -1,7 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { CookieNames } from '../enums/cookie-names.enum';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { User } from '../models/user.model';
+
+const isJwtPayload = (x: string | JwtPayload): x is JwtPayload => {
+  if (typeof x === 'string') {
+    return false;
+  }
+  return true;
+};
 
 export const protect = async (
   req: Request,
@@ -17,7 +24,7 @@ export const protect = async (
     const token = req.signedCookies[CookieNames.AuthCookie];
     const decoded = jwt.verify(String(token), String(process.env.JWT_SECRET));
 
-    if (typeof decoded !== 'string') {
+    if (isJwtPayload(decoded)) {
       const user = await User.findById(decoded.id).select('-password');
       if (user) req.user = user;
       next();
