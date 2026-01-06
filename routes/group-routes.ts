@@ -59,17 +59,8 @@ groupRouter.post(
   '/:groupId/join',
   protect,
   async (req: Request, res: Response) => {
-    // Check if the groupId is a valid ObjectId
-    if (!Types.ObjectId.isValid(req.params.groupId)) {
-      return res.status(404).json({ message: 'Group not found' });
-    }
-
     try {
-      const group = await Group.findById(req.params.groupId);
-
-      if (!group) {
-        return res.status(404).json({ message: 'Group not found' });
-      }
+      const group = await findGroup(req.params.groupId);
 
       if (group.members.includes(req.user._id)) {
         return res
@@ -89,3 +80,44 @@ groupRouter.post(
     }
   },
 );
+
+// Leave a group
+groupRouter.delete(
+  '/:groupId/leave',
+  protect,
+  async (req: Request, res: Response) => {
+    try {
+      const group = await findGroup(req.params.groupId);
+
+      if (!group.members.includes(req.user._id)) {
+        return res.status(400).json({ message: 'Not a member of this group' });
+      }
+
+      group.members = group.members.filter((memberId: Types.ObjectId) => {
+        return memberId.toString() !== req.user._id.toString();
+      });
+
+      await group.save();
+
+      return res.json({ message: 'Successfully left this group' });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      }
+    }
+  },
+);
+
+async function findGroup(groupId: string){
+  // Check if the groupId is a valid ObjectId
+  if (!Types.ObjectId.isValid(groupId)) {
+    throw new Error('Group not found');
+  }
+
+  const group = await Group.findById(groupId);
+
+  if (!group) {
+    throw new Error('Group not found');
+  }
+  return group;
+}
