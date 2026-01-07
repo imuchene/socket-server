@@ -1,47 +1,52 @@
 import { Response, Router, Request } from 'express';
 import { Group } from '../models/group.model';
-import { isAdmin, protect } from '../middleware/auth.middleware';
+import { isAdmin, authGuard } from '../middleware/auth.middleware';
 import { Types } from 'mongoose';
 
 export const groupRouter = Router();
 
 // Create a group
-groupRouter.post('/', protect, isAdmin, async (req: Request, res: Response) => {
-  try {
-    const { name, description } = req.body;
-    // Check if a group already exists
-    const groupExists = await Group.findOne({ name });
+groupRouter.post(
+  '/',
+  authGuard,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const { name, description } = req.body;
+      // Check if a group already exists
+      const groupExists = await Group.findOne({ name });
 
-    if (groupExists) {
-      return res.status(400).json({ message: 'Group already exists' });
-    }
+      if (groupExists) {
+        return res.status(400).json({ message: 'Group already exists' });
+      }
 
-    // Create the new group
-    const group = await Group.create({
-      name,
-      description,
-      admin: req.user._id,
-      members: [req.user._id],
-    });
-
-    if (group) {
-      const populatedGroup = await Group.findById(group._id)
-        .populate('admin', 'username email')
-        .populate('members', 'username email');
-
-      res.status(201).json({
-        populatedGroup,
+      // Create the new group
+      const group = await Group.create({
+        name,
+        description,
+        admin: req.user._id,
+        members: [req.user._id],
       });
+
+      if (group) {
+        const populatedGroup = await Group.findById(group._id)
+          .populate('admin', 'username email')
+          .populate('members', 'username email');
+
+        res.status(201).json({
+          populatedGroup,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      }
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ message: error.message });
-    }
-  }
-});
+  },
+);
 
 // Get all groups
-groupRouter.get('/', protect, async (req: Request, res: Response) => {
+groupRouter.get('/', authGuard, async (req: Request, res: Response) => {
   try {
     const groups = await Group.find()
       .populate('admin', 'username email')
@@ -57,7 +62,7 @@ groupRouter.get('/', protect, async (req: Request, res: Response) => {
 // Join a group
 groupRouter.post(
   '/:groupId/join',
-  protect,
+  authGuard,
   async (req: Request, res: Response) => {
     try {
       const group = await findGroup(req.params.groupId);
@@ -84,7 +89,7 @@ groupRouter.post(
 // Leave a group
 groupRouter.delete(
   '/:groupId/leave',
-  protect,
+  authGuard,
   async (req: Request, res: Response) => {
     try {
       const group = await findGroup(req.params.groupId);
@@ -108,7 +113,7 @@ groupRouter.delete(
   },
 );
 
-async function findGroup(groupId: string){
+async function findGroup(groupId: string) {
   // Check if the groupId is a valid ObjectId
   if (!Types.ObjectId.isValid(groupId)) {
     throw new Error('Group not found');

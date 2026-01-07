@@ -7,6 +7,7 @@ import { socketIo } from './socket';
 import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user-routes';
 import { groupRouter } from './routes/group-routes';
+import { messageRouter } from './routes/message-routes';
 
 const app = express();
 const server = createServer(app);
@@ -47,3 +48,4 @@ socketIo(io);
 // App routes
 app.use('/api/users', userRouter);
 app.use('/api/groups', groupRouter);
+app.use('/api/messages', messageRouter);

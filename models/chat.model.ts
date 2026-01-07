@@ -14,6 +14,7 @@ const messageSchema = new mongoose.Schema(
     group: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Group',
+      required: true,
     },
   },
   {

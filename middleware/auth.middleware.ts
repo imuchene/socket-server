@@ -10,7 +10,7 @@ const isJwtPayload = (x: string | JwtPayload): x is JwtPayload => {
   return true;
 };
 
-export const protect = async (
+export const authGuard = async (
   req: Request,
   res: Response,
   next: NextFunction,
