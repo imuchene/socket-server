@@ -10,7 +10,6 @@ messageRouter.post('/', authGuard, async (req: Request, res: Response) => {
   try {
     const { content, groupId } = req.body;
 
-    // Check if the groupId is a valid ObjectId
     await validateGroupId(groupId);
 
     const message = await Message.create({
@@ -36,7 +35,6 @@ messageRouter.get(
   authGuard,
   async (req: Request, res: Response) => {
     try {
-      // Check if the groupId is a valid ObjectId
       await validateGroupId(req.params.groupId);
 
       const messages = await Message.find({ group: req.params.groupId })
