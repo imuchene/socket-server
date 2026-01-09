@@ -1,18 +1,19 @@
 import { Server, Socket } from 'socket.io';
 import { SocketNotifications } from './enums/socket-notifications.enum';
 import { SocketEvents } from './enums/socket-events.enum';
+import { Message } from './interfaces/message.interface';
 
 export const socketIo = (io: Server) => {
   // Store connected users with their room information
   // using socket.id as their key
   const connectedUsers = new Map();
 
-  /* Handle new socket connnections */
+  //! Handle new socket connnections
   io.on(SocketEvents.Connection, (socket: Socket) => {
     const user = socket.handshake.auth.user;
     console.log('User connected', user?.username);
 
-    /* Join room handler */
+    //! Join room handler
     socket.on(SocketEvents.JoinRoom, (groupId: string) => {
       // Add socket to the specified room
       socket.join(groupId);
@@ -32,7 +33,7 @@ export const socketIo = (io: Server) => {
       });
     });
 
-    /* Leave room handler */
+    //!Leave room handler
     // This is triggered when a user manually leaves a room
     socket.on(SocketEvents.LeaveRoom, (groupId: string) => {
       console.log(`${user?.username} leaving room:`, groupId);
@@ -45,8 +46,41 @@ export const socketIo = (io: Server) => {
       }
     });
 
-    // New message handler
-    // Disconnect handler
-    // Typing indicator
+    //! New message handler
+    // Triggered when a user sends a new message
+    socket.on(SocketEvents.NewMessage, (message: Message) => {
+      // Broadcast message to all other users in the room
+      socket
+        .to(message.groupId)
+        .emit(SocketEvents.MessageReceived, message.message);
+    });
+
+    //! Disconnect handler
+    // Triggered when a user closes the connection
+    socket.on(SocketEvents.Disconnect, () => {
+      console.log(`${user.username} disconnected`);
+      if (connectedUsers.has(socket.id)) {
+        // Get user's room before removing
+        const userData = connectedUsers.get(socket.id);
+        // Notify others in the room about the user's departure
+        socket.to(userData.room).emit(SocketEvents.UserLeft, user?._id);
+        // Remove user from the connected users
+        connectedUsers.delete(socket.id);
+      }
+    });
+
+    //! Typing indicator
+    // Triggered when a user starts typing
+    socket.on(SocketEvents.Typing, ({ groupId, username }) => {
+      // Broadcast typing status to other users in the room
+      socket.to(groupId).emit(SocketEvents.UserTyping, { username });
+    });
+
+    socket.on(SocketEvents.StopTyping, ({ groupId }) => {
+      // Broadcast stop typing status to other users in the room
+      socket
+        .to(groupId)
+        .emit(SocketEvents.UserStopTyping, { username: user?.username });
+    });
   });
 };

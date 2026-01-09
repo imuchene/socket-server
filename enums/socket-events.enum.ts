@@ -5,4 +5,11 @@ export enum SocketEvents {
   UsersInRoom = 'UsersInRoom',
   Notification = 'Notification',
   UserLeft = 'UserLeft',
+  NewMessage = 'NewMessage',
+  MessageReceived = 'MessageReceived',
+  Disconnect = 'Disconnect',
+  Typing = 'Typing',
+  UserTyping = 'UserTyping',
+  StopTyping = 'StopTyping',
+  UserStopTyping = 'UserStopTyping',
 }
