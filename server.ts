@@ -1,10 +1,11 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import mongoose from 'mongoose';
 import { socketIo } from './socket';
 import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
 import { userRouter } from './routes/user-routes';
 import { groupRouter } from './routes/group-routes';
 import { messageRouter } from './routes/message-routes';
@@ -26,9 +27,14 @@ server.listen(port, () => {
 });
 
 // Middleware
-app.use(cors());
+const corsOptions: CorsOptions = { origin: process.env.FRONTEND_URL };
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to database
 mongoose
