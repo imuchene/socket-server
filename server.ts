@@ -27,7 +27,10 @@ server.listen(port, () => {
 });
 
 // Middleware
-const corsOptions: CorsOptions = { origin: process.env.FRONTEND_URL };
+const corsOptions: CorsOptions = {
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+};
 app.use(cors(corsOptions));
 
 app.use(express.json());
