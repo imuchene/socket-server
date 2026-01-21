@@ -1,5 +1,5 @@
 export enum SocketEvents {
-  Connection = 'Connection',
+  Connection = 'connection',
   JoinRoom = 'JoinRoom',
   LeaveRoom = 'LeaveRoom',
   UsersInRoom = 'UsersInRoom',
