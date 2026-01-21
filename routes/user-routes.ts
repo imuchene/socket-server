@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { CookieNames } from '../enums/cookie-names.enum';
 import { JwtData } from '../interfaces/jwt-data.interface';
+import { authGuard } from '../middleware/auth.middleware';
 
 export const userRouter = Router();
 
@@ -60,6 +61,17 @@ userRouter.post('/login', async (req: Request, res: Response) => {
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+});
+
+// Logout route
+userRouter.delete('/logout', authGuard, async (req: Request, res: Response) => {
+  try {
+    res.clearCookie(CookieNames.AuthCookie).json({ message: 'Logged out' });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ message: error.message });

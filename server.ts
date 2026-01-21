@@ -29,12 +29,12 @@ server.listen(port, () => {
 // Middleware
 const corsOptions: CorsOptions = {
   origin: process.env.FRONTEND_URL,
-  credentials: true,
+  credentials: true, // Needed for secure cookies
 };
 app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.COOKIE_SECRET)); // Needed for secure cookies
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
