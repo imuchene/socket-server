@@ -5,6 +5,7 @@ export enum SocketEvents {
   UsersInRoom = 'UsersInRoom',
   Notification = 'Notification',
   UserLeft = 'UserLeft',
+  UserJoined = 'UserJoined',
   NewMessage = 'NewMessage',
   MessageReceived = 'MessageReceived',
   Disconnect = 'Disconnect',

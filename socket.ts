@@ -1,5 +1,4 @@
 import { Server, Socket } from 'socket.io';
-import { SocketNotifications } from './enums/socket-notifications.enum';
 import { SocketEvents } from './enums/socket-events.enum';
 import { Message } from './interfaces/message.interface';
 
@@ -27,7 +26,7 @@ export const socketIo = (io: Server) => {
       io.in(groupId).emit(SocketEvents.UsersInRoom, usersInRoom);
       // Broadcast join notification to all other users in the room
       socket.to(groupId).emit(SocketEvents.Notification, {
-        type: SocketNotifications.UserJoined,
+        type: SocketEvents.UserJoined,
         message: `${user?.username} has joined`,
         user: user,
       });
